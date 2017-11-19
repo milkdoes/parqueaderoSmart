@@ -1,6 +1,7 @@
 /*
+	 Instrucciones de autor original.
 	 BYJ48 Stepper motor code
-Connect :
+Connect:
 IN1 >> D8
 IN2 >> D9
 IN3 >> D10
@@ -12,47 +13,61 @@ https://www.instructables.com/member/Mohannad+Rawashdeh/
 28/9/2013
  */
 
-#define IN1  8
-#define IN2  9
-#define IN3  10
-#define IN4  11
-int Steps = 0;
-boolean Direction = true;// gre
-unsigned long last_time;
-unsigned long currentMillis ;
-int steps_left=4095;
-long time;
+// CONSTANTES.
+// Baudios a los cuales operar.
+const byte BAUDIOS = 115200;
+// Pasos maximos del motor.
+const unsigned int PASOS_MAXIMOS = 4095;
+// Pines en arduino a usar para operar el motor.
+enum MOTOR {
+	IN1 = 8,
+	IN2 = 9,
+	IN3 = 10,
+	IN4 = 11
+};
+
+// VARIABLES GLOBALES.
+int pasos = 0;
+boolean direccion = true; // gre.
+unsigned long ultimoTiempo;
+unsigned long milisegundosActuales;
+int pasosFaltantes = PASOS_MAXIMOS;
+long tiempo;
+
+// INICIALIZACION.
 void setup()
 {
-	Serial.begin(115200);
+	Serial.begin(BAUDIOS);
 	pinMode(IN1, OUTPUT);
 	pinMode(IN2, OUTPUT);
 	pinMode(IN3, OUTPUT);
 	pinMode(IN4, OUTPUT);
-	// delay(1000);
-
 }
+
+// PRINCIPAL.
 void loop()
 {
-	while(steps_left>0){
-		currentMillis = micros();
-		if(currentMillis-last_time>=1000){
+	while (pasosFaltantes > 0) {
+		milisegundosActuales = micros();
+		if ((milisegundosActuales - ultimoTiempo) >= 1000) {
 			stepper(1);
-			time=time+micros()-last_time;
-			last_time=micros();
-			steps_left--;
+			tiempo = (tiempo + micros() - ultimoTiempo);
+			ultimoTiempo = micros();
+			pasosFaltantes--;
 		}
 	}
-	Serial.println(time);
-	Serial.println("Wait...!");
-	delay(2000);
-	Direction=!Direction;
-	steps_left=4095;
+
+	Serial.println(tiempo);
+	Serial.println("Espera...!");
+	delay(500);
+	direccion = !direccion;
+	pasosFaltantes = PASOS_MAXIMOS;
 }
 
-void stepper(int xw){
-	for (int x=0;x<xw;x++){
-		switch(Steps){
+void stepper(int xw)
+{
+	for (int x = 0; x < xw; x++) {
+		switch (pasos) {
 			case 0:
 				digitalWrite(IN1, LOW);
 				digitalWrite(IN2, LOW);
@@ -108,12 +123,18 @@ void stepper(int xw){
 				digitalWrite(IN4, LOW);
 				break;
 		}
-		SetDirection();
+		AvanzarEnDireccion();
 	}
 }
-void SetDirection(){
-	if(Direction==1){ Steps++;}
-	if(Direction==0){ Steps--; }
-	if(Steps>7){Steps=0;}
-	if(Steps<0){Steps=7; }
+
+void AvanzarEnDireccion()
+{
+	if (direccion == 1)
+		pasos++;
+	if (direccion == 0)
+		pasos--;
+	if (pasos > 7)
+		pasos = 0;
+	if (pasos < 0)
+		pasos = 7;
 }
