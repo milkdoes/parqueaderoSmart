@@ -15,7 +15,7 @@ https://www.instructables.com/member/Mohannad+Rawashdeh/
 
 // CONSTANTES.
 // Baudios a los cuales operar.
-const byte BAUDIOS = 115200;
+const unsigned long BAUDIOS = 115200;
 // Pasos maximos del motor.
 const unsigned int PASOS_MAXIMOS = 4095;
 // Pines en arduino a usar para operar el motor.
