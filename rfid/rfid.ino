@@ -157,7 +157,7 @@ void loop() {
 }
 
 // FUNCTIONS.
-// Get ownership
+// Get uid number o uid tag.
 int GetUidNumber(byte uidTag[UID_BYTE_COUNT])
 {
 	// RFID values to return.
@@ -206,7 +206,7 @@ void DisplayOwnership(uid uidTag)
 	Serial.println();
 }
 
-//
+// Send lot data trough pins.
 void SendLotData(uid uidTag)
 {
 	// Write if item still in lot.
