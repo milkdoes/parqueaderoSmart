@@ -1,31 +1,36 @@
 /*
-   --------------------------------------------------------------------------------------------------------------------
-   Example sketch/program showing how to read new NUID from a PICC to serial.
-   --------------------------------------------------------------------------------------------------------------------
-   This is a MFRC522 library example; for further details and other examples see: https://github.com/miguelbalboa/rfid
+	 ----------------------------------------------------------------------------
+	 Example sketch/program showing how to read new NUID from a PICC to serial.
+	 ----------------------------------------------------------------------------
+	 This is a MFRC522 library example; for further details and other examples
+  see: https://github.com/miguelbalboa/rfid
 
-   Example sketch/program showing how to the read data from a PICC (that is: a RFID Tag or Card) using a MFRC522 based RFID
-   Reader on the Arduino SPI interface.
+  Example sketch/program showing how to the read data from a PICC (that is: a
+  RFID Tag or Card) using a MFRC522 based RFID Reader on the Arduino SPI
+  interface.
 
-   When the Arduino and the MFRC522 module are connected (see the pin layout below), load this sketch into Arduino IDE
-   then verify/compile and upload it. To see the output: use Tools, Serial Monitor of the IDE (hit Ctrl+Shft+M). When
-   you present a PICC (that is: a RFID Tag or Card) at reading distance of the MFRC522 Reader/PCD, the serial output
-   will show the type, and the NUID if a new card has been detected. Note: you may see "Timeout in communication" messages
-   when removing the PICC from reading distance too early.
+  When the Arduino and the MFRC522 module are connected (see the pin layout
+  below), load this sketch into Arduino IDE then verify/compile and upload it.
+  To see the output: use Tools, Serial Monitor of the IDE (hit Ctrl+Shft+M).
+  When you present a PICC (that is: a RFID Tag or Card) at reading distance of
+  the MFRC522 Reader/PCD, the serial output will show the type, and the NUID
+  if a new card has been detected. Note: you may see "Timeout in
+  communication" messages when removing the PICC from reading distance too
+  early.
 
-   @license Released into the public domain.
+  @license Released into the public domain.
 
-   Typical pin layout used:
-   -----------------------------------------------------------------------------------------
-               MFRC522      Arduino       Arduino   Arduino    Arduino          Arduino
-               Reader/PCD   Uno/101       Mega      Nano v3    Leonardo/Micro   Pro Micro
-   Signal      Pin          Pin           Pin       Pin        Pin              Pin
-   -----------------------------------------------------------------------------------------
-   RST/Reset   RST          9             5         D9         RESET/ICSP-5     RST
-   SPI SS      SDA(SS)      10            53        D10        10               10
-   SPI MOSI    MOSI         11 / ICSP-4   51        D11        ICSP-4           16
-   SPI MISO    MISO         12 / ICSP-1   50        D12        ICSP-1           14
-   SPI SCK     SCK          13 / ICSP-3   52        D13        ICSP-3           15
+  Typical pin layout used:
+  ------------------------------------------------------------------------------
+  MFRC522     Arduino      Arduino  Arduino  Arduino        Arduino
+  Reader/PCD  Uno/101      Mega     Nano v3  Leonardo/Micro Pro Micro
+  Signal     Pin         Pin          Pin      Pin      Pin            Pin
+  ------------------------------------------------------------------------------
+  RST/Reset  RST         9            5        D9       RESET/ICSP-5   RST
+  SPI SS     SDA(SS)     10           53       D10      10             10
+  SPI MOSI   MOSI        11 / ICSP-4  51       D11      ICSP-4         16
+  SPI MISO   MISO        12 / ICSP-1  50       D12      ICSP-1         14
+  SPI SCK    SCK         13 / ICSP-3  52       D13      ICSP-3         15
 */
 
 // LIBRARIES.
@@ -45,19 +50,30 @@ MFRC522::MIFARE_Key key;
 // CONSTANTS.
 // Number of bytes in a UID.
 const byte UID_BYTE_COUNT = 4;
+// Numbers for ownership.
+enum title {
+  TITLE_NONE = 0
+  , TITLE_HOST = 1
+  , TITLE_GUEST = 2
+};
 // Number of existent hosts.
 const byte HOST_COUNT = 2;
 // Number of existent guests.
 const byte GUEST_COUNT = 2;
+// Number of existent clients.
+const byte CLIENT_COUNT = HOST_COUNT + GUEST_COUNT;
+
+struct uid {
+  title ownership;
+  byte key[UID_BYTE_COUNT];
+};
 
 // Collections to store unique rfid identifiers.
-const byte HOST_UID[HOST_COUNT][4] = {
-  {54, 228, 179, 121}
-  , {144, 231, 136, 73}
-};
-const byte GUEST_UID[GUEST_COUNT][4] = {
-  {38, 248, 82, 165}
-  , {22, 16, 175, 121}
+const uid CLIENT_UID[CLIENT_COUNT] = {
+  {TITLE_HOST, {54, 228, 179, 121}}
+  , {TITLE_HOST, {144, 231, 136, 73}}
+  , {TITLE_GUEST, {38, 248, 82, 165}}
+  , {TITLE_GUEST, {22, 16, 175, 121}}
 };
 
 // Init array that will store new NUID.
@@ -142,56 +158,33 @@ void DisplayOwnership(byte uid[UID_BYTE_COUNT])
   // Define ownership to display.
   String ownership = "does not exist.";
 
-  // Verify if UID is for a host.
-  bool uidIsHost = false;
-  for (byte host = 0; host < HOST_COUNT; host++) {
-    bool currentHostIsUid = true;
+  // Verify if UID is for a client.
+  byte uidIsClient = 0;
+  for (byte client = 0; client < CLIENT_COUNT; client++) {
+    bool currentClientIsUid = true;
 
-    // Loop trough all bytes of the current host ID.
+    // Loop trough all bytes of the current client ID.
     for (byte currentByte = 0; currentByte < UID_BYTE_COUNT; currentByte++) {
-      byte currentHostUidByte = HOST_UID[host][currentByte];
+      byte currentClientUidByte = CLIENT_UID[client].key[currentByte];
       byte currentUidByte = uid[currentByte];
-      if (currentHostUidByte != currentUidByte) {
-        currentHostIsUid = false;
+      if (currentClientUidByte != currentUidByte) {
+        currentClientIsUid = false;
         currentByte = UID_BYTE_COUNT;
       }
     }
 
-    // If the current host ID is the same as the UID,
-    // define UID as a host and end the loop.
-    if (currentHostIsUid) {
-      uidIsHost = true;
-      host = HOST_COUNT;
-    }
-  }
-
-  // Verify if UID is for a guest.
-  bool uidIsGuest = false;
-  for (byte guest = 0; guest < GUEST_COUNT; guest++) {
-    bool currentGuestIsUid = true;
-
-    // Loop trough all bytes of the current guest ID.
-    for (byte currentByte = 0; currentByte < UID_BYTE_COUNT; currentByte++) {
-      byte currentGuestUidByte = GUEST_UID[guest][currentByte];
-      byte currentUidByte = uid[currentByte];
-      if (currentGuestUidByte != currentUidByte) {
-        currentGuestIsUid = false;
-        currentByte = UID_BYTE_COUNT;
-      }
-    }
-
-    // If the current guest ID is the same as the UID,
-    // define UID as a guest and end the loop.
-    if (currentGuestIsUid) {
-      uidIsGuest = true;
-      guest = GUEST_COUNT;
+    // If the current client ID is the same as the UID,
+    // define UID as a client and end the loop.
+    if (currentClientIsUid) {
+			uidIsClient = CLIENT_UID[client].ownership;
+      client = CLIENT_COUNT;
     }
   }
 
   // Define text if UID is a host or guest.
-  if (uidIsHost)
+  if (uidIsClient == TITLE_HOST)
     ownership = "is for a host.";
-  else if (uidIsGuest)
+  else if (uidIsClient == TITLE_GUEST)
     ownership = "is for a guest.";
 
   Serial.print("The NUID tag ");
@@ -199,7 +192,7 @@ void DisplayOwnership(byte uid[UID_BYTE_COUNT])
 }
 
 /**
-   Helper routine to dump a byte array as hex values to Serial.
+	Helper routine to dump a byte array as hex values to Serial.
 */
 void printHex(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
@@ -209,7 +202,7 @@ void printHex(byte *buffer, byte bufferSize) {
 }
 
 /**
-   Helper routine to dump a byte array as dec values to Serial.
+	Helper routine to dump a byte array as dec values to Serial.
 */
 void printDec(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
