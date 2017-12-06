@@ -21,16 +21,16 @@ early.
 @license Released into the public domain.
 
 Typical pin layout used:
-------------------------------------------------------------------------------
-MFRC522     Arduino      Arduino  Arduino  Arduino        Arduino
-Reader/PCD  Uno/101      Mega     Nano v3  Leonardo/Micro Pro Micro
-Signal     Pin         Pin          Pin      Pin      Pin            Pin
-------------------------------------------------------------------------------
-RST/Reset  RST         9            5        D9       RESET/ICSP-5   RST
-SPI SS     SDA(SS)     10           53       D10      10             10
-SPI MOSI   MOSI        11 / ICSP-4  51       D11      ICSP-4         16
-SPI MISO   MISO        12 / ICSP-1  50       D12      ICSP-1         14
-SPI SCK    SCK         13 / ICSP-3  52       D13      ICSP-3         15
+-------------------------------------------------------------------------------
+           MFRC522     Arduino      Arduino  Arduino  Arduino         Arduino
+           Reader/PCD  Uno/101      Mega     Nano v3  Leonardo/Micro  Pro Micro
+Signal     Pin         Pin          Pin      Pin      Pin             Pin
+-------------------------------------------------------------------------------
+RST/Reset  RST         Analog0      5        D9       RESET/ICSP-5    RST
+SPI SS     SDA(SS)     Analog1      53       D10      10              10
+SPI MOSI   MOSI        11 / ICSP-4  51       D11      ICSP-4          16
+SPI MISO   MISO        12 / ICSP-1  50       D12      ICSP-1          14
+SPI SCK    SCK         13 / ICSP-3  52       D13      ICSP-3          15
  */
 
 // LIBRARIES.
@@ -38,8 +38,8 @@ SPI SCK    SCK         13 / ICSP-3  52       D13      ICSP-3         15
 #include <MFRC522.h>
 
 // ARDUINO PINS.
-constexpr uint8_t RST_PIN = 9;     // Configurable, see typical pin layout above
-constexpr uint8_t SS_PIN = 10;     // Configurable, see typical pin layout above
+constexpr uint8_t RST_PIN = A0;     // Configurable, see typical pin layout above
+constexpr uint8_t SS_PIN = A1;     // Configurable, see typical pin layout above
 const byte IN_LOT_PIN = 8;
 const byte LOT_NUMBER_PIN1 = 3;
 const byte LOT_NUMBER_PIN2 = 4;

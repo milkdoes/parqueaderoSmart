@@ -1,3 +1,16 @@
+/* Conexiones para identificador de RFID:
+-------------------------------------------------------------------------------
+           MFRC522     Arduino      Arduino  Arduino  Arduino         Arduino
+           Reader/PCD  Uno/101      Mega     Nano v3  Leonardo/Micro  Pro Micro
+Signal     Pin         Pin          Pin      Pin      Pin             Pin
+-------------------------------------------------------------------------------
+RST/Reset  RST         Analog0      5        D9       RESET/ICSP-5    RST
+SPI SS     SDA(SS)     Analog1      53       D10      10              10
+SPI MOSI   MOSI        11 / ICSP-4  51       D11      ICSP-4          16
+SPI MISO   MISO        12 / ICSP-1  50       D12      ICSP-1          14
+SPI SCK    SCK         13 / ICSP-3  52       D13      ICSP-3          15
+	 */
+
 /* Motor Paso a Paso ajustado a grados
   by: www.elprofegarcia.com
 
@@ -6,7 +19,7 @@
   8          IN4    2             IN4
   9          IN3    3             IN3
   10         IN2    4             IN2
-  11         IN1    5             IN1
+  7          IN1    5             IN1
 
   Servo
   Arduino
@@ -18,8 +31,8 @@
 #include <MFRC522.h>
 
 // ARDUINO PINS.
-constexpr uint8_t RST_PIN = 6;     // Configurable, see typical pin layout above
-constexpr uint8_t SS_PIN = 7;     // Configurable, see typical pin layout above
+constexpr uint8_t RST_PIN = A0;
+constexpr uint8_t SS_PIN = A1;
 
 // RFID class.
 MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
@@ -75,12 +88,12 @@ void setup() {
   pinMode(4, OUTPUT);
   pinMode(3, OUTPUT);
   pinMode(2, OUTPUT);
-  pinMode(11, OUTPUT);    // Pin 11 conectar a IN4
+  pinMode(7, OUTPUT);    // Pin 7 conectar a IN4
   pinMode(10, OUTPUT);    // Pin 10 conectar a IN3
   pinMode(9, OUTPUT);     // Pin 9 conectar a IN2
   pinMode(8, OUTPUT);     // Pin 8 conectar a IN1
 
-  
+
   SPI.begin(); // Init SPI bus
   rfid.PCD_Init(); // Init MFRC522
 
@@ -93,12 +106,13 @@ void setup() {
   Serial.println(F("This code scans the MIFARE Classsic NUID."));
   Serial.print(F("Using the following key:"));
   printHex(key.keyByte, MFRC522::MF_KEY_SIZE);
+	Serial.println();
   Serial.println("Please enter valid RFID tag.");
   Serial.println();
 }
 
 void loop() {
-  
+
   // Look for new cards.
   if ( ! rfid.PICC_IsNewCardPresent())
     return;
@@ -142,7 +156,7 @@ void loop() {
 
   // Stop encryption on PCD.
   rfid.PCD_StopCrypto1();
-  
+
   x_der();
   apagado_x();
   x_izq();
@@ -156,22 +170,22 @@ void loop() {
 
 void x_der() {        // Pasos a la derecha
   for (i = 0; i < 512; i++) {
-    digitalWrite(11, HIGH);
+    digitalWrite(7, HIGH);
     digitalWrite(10, HIGH);
     digitalWrite(9, LOW);
     digitalWrite(8, LOW);
     delay(retardo);
-    digitalWrite(11, LOW);
+    digitalWrite(7, LOW);
     digitalWrite(10, HIGH);
     digitalWrite(9, HIGH);
     digitalWrite(8, LOW);
     delay(retardo);
-    digitalWrite(11, LOW);
+    digitalWrite(7, LOW);
     digitalWrite(10, LOW);
     digitalWrite(9, HIGH);
     digitalWrite(8, HIGH);
     delay(retardo);
-    digitalWrite(11, HIGH);
+    digitalWrite(7, HIGH);
     digitalWrite(10, LOW);
     digitalWrite(9, LOW);
     digitalWrite(8, HIGH);
@@ -181,22 +195,22 @@ void x_der() {        // Pasos a la derecha
 
 void x_izq() {        // Pasos a la izquierda
   for (i = 0; i < 512; i++) {
-    digitalWrite(11, LOW);
+    digitalWrite(7, LOW);
     digitalWrite(10, LOW);
     digitalWrite(9, HIGH);
     digitalWrite(8, HIGH);
     delay(retardo);
-    digitalWrite(11, LOW);
+    digitalWrite(7, LOW);
     digitalWrite(10, HIGH);
     digitalWrite(9, HIGH);
     digitalWrite(8, LOW);
     delay(retardo);
-    digitalWrite(11, HIGH);
+    digitalWrite(7, HIGH);
     digitalWrite(10, HIGH);
     digitalWrite(9, LOW);
     digitalWrite(8, LOW);
     delay(retardo);
-    digitalWrite(11, HIGH);
+    digitalWrite(7, HIGH);
     digitalWrite(10, LOW);
     digitalWrite(9, LOW);
     digitalWrite(8, HIGH);
@@ -205,7 +219,7 @@ void x_izq() {        // Pasos a la izquierda
 }
 
 void apagado_x() {         // Apagado del Motor
-  digitalWrite(11, LOW);
+  digitalWrite(7, LOW);
   digitalWrite(10, LOW);
   digitalWrite(9, LOW);
   digitalWrite(8, LOW);
