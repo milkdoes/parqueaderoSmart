@@ -82,16 +82,17 @@ int i = 0;
 
 void setup() {
   Serial.begin(9600);     // inicializamos el puerto serie a 9600 baudios
-  servo.attach(6);
-  pinMode(1, INPUT);
-  pinMode(5, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(3, OUTPUT);
-  pinMode(2, OUTPUT);
-  pinMode(7, OUTPUT);    // Pin 7 conectar a IN4
-  pinMode(10, OUTPUT);    // Pin 10 conectar a IN3
-  pinMode(9, OUTPUT);     // Pin 9 conectar a IN2
-  pinMode(8, OUTPUT);     // Pin 8 conectar a IN1
+servo.attach(10);
+//Motor Eje X
+pinMode(9,OUTPUT);
+pinMode(8,OUTPUT);
+pinMode(7,OUTPUT);
+pinMode(6,OUTPUT);
+//Motor Eje Y
+pinMode(5, OUTPUT);
+pinMode(4, OUTPUT);    
+pinMode(3, OUTPUT);     
+pinMode(2, OUTPUT);     
 
 
   SPI.begin(); // Init SPI bus
@@ -145,6 +146,7 @@ void loop() {
   int rfidNumber = GetUidNumber(rfid.uid.uidByte);
   uid rfidTag = CLIENT_UID[rfidNumber];
   DisplayOwnership(rfidTag);
+  Movimiento(rfidTag);
 
   // Change lot status.
   CLIENT_UID[rfidNumber].inLot = ! rfidTag.inLot;
@@ -157,7 +159,7 @@ void loop() {
   // Stop encryption on PCD.
   rfid.PCD_StopCrypto1();
 
-  x_der();
+  /*x_der();
   apagado_x();
   x_izq();
   apagado_x();
@@ -168,119 +170,270 @@ void loop() {
   // Apagado del Motor para que no se caliente
 }  ///////////////////// Fin del Loop ///////////////////////////
 
-void x_der() {        // Pasos a la derecha
-  for (i = 0; i < 512; i++) {
-    digitalWrite(7, HIGH);
-    digitalWrite(10, HIGH);
-    digitalWrite(9, LOW);
-    digitalWrite(8, LOW);
-    delay(retardo);
-    digitalWrite(7, LOW);
-    digitalWrite(10, HIGH);
-    digitalWrite(9, HIGH);
-    digitalWrite(8, LOW);
-    delay(retardo);
-    digitalWrite(7, LOW);
-    digitalWrite(10, LOW);
-    digitalWrite(9, HIGH);
-    digitalWrite(8, HIGH);
-    delay(retardo);
-    digitalWrite(7, HIGH);
-    digitalWrite(10, LOW);
-    digitalWrite(9, LOW);
-    digitalWrite(8, HIGH);
-    delay(retardo);
+void Movimiento(uid uidTag) {
+    // Determinar si dejar o recoger el objeto.
+  bool recoger = uidTag.inLot;
+  
+  // Determinar los movimientos de a cuerdo al numero de lote.
+  byte espacio = uidTag.assignedSpace;
+  switch(espacio) {
+    case 1:
+      if(recoger){
+        espacio1_out();
+      }
+      else{
+        espacio1_in();
+      }
+    break;
+
+    case 2:
+      if(recoger){
+        espacio2_out();
+      }
+      else{
+        espacio2_in();
+      }
+    break;
+
+    default:
+    break;
   }
 }
 
-void x_izq() {        // Pasos a la izquierda
-  for (i = 0; i < 512; i++) {
-    digitalWrite(7, LOW);
-    digitalWrite(10, LOW);
-    digitalWrite(9, HIGH);
-    digitalWrite(8, HIGH);
+void x_izq(){         // Pasos a la derecha
+ 
+   digitalWrite(6, HIGH); 
+   digitalWrite(7, HIGH);  
+   digitalWrite(8, LOW);  
+   digitalWrite(9, LOW);  
+     delay(retardo); 
+   digitalWrite(6, LOW); 
+   digitalWrite(7, HIGH);  
+   digitalWrite(8, HIGH);  
+   digitalWrite(9, LOW);  
+     delay(retardo); 
+   digitalWrite(6, LOW); 
+   digitalWrite(7, LOW);  
+   digitalWrite(8, HIGH);  
+   digitalWrite(9, HIGH);  
+    delay(retardo); 
+   digitalWrite(6, HIGH); 
+   digitalWrite(7, LOW);  
+   digitalWrite(8, LOW);  
+   digitalWrite(9, HIGH);  
     delay(retardo);
-    digitalWrite(7, LOW);
-    digitalWrite(10, HIGH);
-    digitalWrite(9, HIGH);
-    digitalWrite(8, LOW);
-    delay(retardo);
-    digitalWrite(7, HIGH);
-    digitalWrite(10, HIGH);
-    digitalWrite(9, LOW);
-    digitalWrite(8, LOW);
-    delay(retardo);
-    digitalWrite(7, HIGH);
-    digitalWrite(10, LOW);
-    digitalWrite(9, LOW);
-    digitalWrite(8, HIGH);
-    delay(retardo);
-  }
+  
 }
 
+void x_der() {        // Pasos a la izquierda
+  
+ digitalWrite(6, LOW); 
+ digitalWrite(7, LOW);  
+ digitalWrite(8, HIGH);  
+ digitalWrite(9, HIGH);  
+  delay(retardo); 
+ digitalWrite(6, LOW); 
+ digitalWrite(7, HIGH);  
+ digitalWrite(8, HIGH);  
+ digitalWrite(9, LOW);  
+  delay(retardo); 
+ digitalWrite(6, HIGH); 
+ digitalWrite(7, HIGH);  
+ digitalWrite(8, LOW);  
+ digitalWrite(9, LOW);  
+  delay(retardo); 
+ digitalWrite(6, HIGH); 
+ digitalWrite(7, LOW);  
+ digitalWrite(8, LOW);  
+ digitalWrite(9, HIGH);  
+  delay(retardo); 
+  
+}
+        
 void apagado_x() {         // Apagado del Motor
-  digitalWrite(7, LOW);
-  digitalWrite(10, LOW);
-  digitalWrite(9, LOW);
-  digitalWrite(8, LOW);
+ digitalWrite(6, LOW); 
+ digitalWrite(7, LOW);  
+ digitalWrite(8, LOW);  
+ digitalWrite(9, LOW);  
+ }
+
+ void y_abajo(){         // Pasos a la derecha
+ 
+   digitalWrite(2, HIGH); 
+   digitalWrite(3, HIGH);  
+   digitalWrite(4, LOW);  
+   digitalWrite(5, LOW);  
+     delay(retardo); 
+   digitalWrite(2, LOW); 
+   digitalWrite(3, HIGH);  
+   digitalWrite(4, HIGH);  
+   digitalWrite(5, LOW);  
+     delay(retardo); 
+   digitalWrite(2, LOW); 
+   digitalWrite(3, LOW);  
+   digitalWrite(4, HIGH);  
+   digitalWrite(5, HIGH);  
+    delay(retardo); 
+   digitalWrite(2, HIGH); 
+   digitalWrite(3, LOW);  
+   digitalWrite(4, LOW);  
+   digitalWrite(5, HIGH);  
+    delay(retardo);
+  
 }
 
-void y_der() {        // Pasos a la derecha
-  for (i = 0; i < 512; i++) {
-    digitalWrite(5, HIGH);
-    digitalWrite(4, HIGH);
-    digitalWrite(3, LOW);
-    digitalWrite(2, LOW);
-    delay(retardo);
-    digitalWrite(5, LOW);
-    digitalWrite(4, HIGH);
-    digitalWrite(3, HIGH);
-    digitalWrite(2, LOW);
-    delay(retardo);
-    digitalWrite(5, LOW);
-    digitalWrite(4, LOW);
-    digitalWrite(3, HIGH);
-    digitalWrite(2, HIGH);
-    delay(retardo);
-    digitalWrite(5, HIGH);
-    digitalWrite(4, LOW);
-    digitalWrite(3, LOW);
-    digitalWrite(2, HIGH);
-    delay(retardo);
-  }
+void y_arriba() {        // Pasos a la izquierda
+  
+ digitalWrite(2, LOW); 
+ digitalWrite(3, LOW);  
+ digitalWrite(4, HIGH);  
+ digitalWrite(5, HIGH);  
+  delay(retardo); 
+ digitalWrite(2, LOW); 
+ digitalWrite(3, HIGH);  
+ digitalWrite(4, HIGH);  
+ digitalWrite(5, LOW);  
+  delay(retardo); 
+ digitalWrite(2, HIGH); 
+ digitalWrite(3, HIGH);  
+ digitalWrite(4, LOW);  
+ digitalWrite(5, LOW);  
+  delay(retardo); 
+ digitalWrite(2, HIGH); 
+ digitalWrite(3, LOW);  
+ digitalWrite(4, LOW);  
+ digitalWrite(5, HIGH);  
+  delay(retardo); 
+  
 }
-
-void y_izq() {        // Pasos a la izquierda
-  for (i = 0; i < 512; i++) {
-    digitalWrite(5, LOW);
-    digitalWrite(4, LOW);
-    digitalWrite(3, HIGH);
-    digitalWrite(2, HIGH);
-    delay(retardo);
-    digitalWrite(5, LOW);
-    digitalWrite(4, HIGH);
-    digitalWrite(3, HIGH);
-    digitalWrite(2, LOW);
-    delay(retardo);
-    digitalWrite(5, HIGH);
-    digitalWrite(4, HIGH);
-    digitalWrite(3, LOW);
-    digitalWrite(2, LOW);
-    delay(retardo);
-    digitalWrite(5, HIGH);
-    digitalWrite(4, LOW);
-    digitalWrite(3, LOW);
-    digitalWrite(2, HIGH);
-    delay(retardo);
-  }
-}
-
+        
 void apagado_y() {         // Apagado del Motor
-  digitalWrite(5, LOW);
-  digitalWrite(4, LOW);
-  digitalWrite(3, LOW);
-  digitalWrite(2, LOW);
+ digitalWrite(5, LOW); 
+ digitalWrite(4, LOW);  
+ digitalWrite(3, LOW);  
+ digitalWrite(2, LOW);  
+ }
+
+void dentro(){
+  for (pos = 180; pos >= 0; pos -= 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    servo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
 }
+void fuera(){
+   for (pos = 0; pos <= 180; pos += 1) { // goes from 180 degrees to 0 degrees
+    servo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+  }
+
+  void espacio1_in(){
+     fuera();
+        for(i=0;i<256;i++){
+          y_arriba();
+        }
+        dentro();
+        for(i=0;i<1408;i++){
+          y_abajo();
+        }
+        for(i=0;i<1024; i++){
+          x_izq();
+        }
+        fuera();
+        fuera();
+        for(i=0;i<256;i++){
+          y_abajo();
+        }
+        dentro();
+        for(i=0;i<1024;i++){
+          x_der();
+        }
+        for(i=0;i<1408;i++){
+          y_arriba();
+        }
+        apagado_x();
+        apagado_y();
+    }
+    void espacio2_in(){
+      fuera();
+        for(i=0;i<256;i++){
+          y_arriba();
+        }
+        dentro();
+        for(i=0;i<1152;i++){
+          y_abajo();
+        }
+        for(i=0;i<1024; i++){
+          x_der();
+        }
+        fuera();
+        for(i=0;i<256;i++){
+          y_abajo();
+        }
+        dentro();
+        for(i=0;i<1024;i++){
+          x_izq();
+        }
+        for(i=0;i<1152;i++){
+          y_arriba();
+        }
+        apagado_x();
+        apagado_y();
+      }
+      void espacio1_out(){
+        for(i=0;i<1400;i++){
+          y_abajo();
+        }
+        for(i=0;i<1024; i++){
+          x_izq();
+        }
+        fuera();
+        for(i=0;i<256;i++){
+          y_arriba();
+        }
+        dentro();
+        for(i=0;i<1024;i++){
+          x_der();
+        }
+        for(i=0;i<1400;i++){
+          y_arriba();
+        }
+        fuera();
+        for(i=0;i<256;i++){
+          y_abajo();
+        }
+        dentro();
+        apagado_x();
+        apagado_y();
+    }
+    void espacio2_out(){
+        for(i=0;i<1300;i++){
+          y_abajo();
+        }
+        for(i=0;i<1024; i++){
+          x_der();
+        }
+        fuera();
+        for(i=0;i<256;i++){
+          y_arriba();
+        }
+        dentro();
+        for(i=0;i<1024;i++){
+          
+          x_izq();
+        }
+        for(i=0;i<1300;i++){
+          y_arriba();
+        }
+        fuera();
+        for(i=0;i<256;i++){
+          y_abajo();
+        }
+        dentro();
+        apagado_x();
+        apagado_y();
+      }
 
 // FUNCTIONS.
 // Get uid number o uid tag.
